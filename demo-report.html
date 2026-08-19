@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cimeter report</title>
+<style>
+  body{font-family:-apple-system,'Segoe UI','Malgun Gothic',sans-serif;max-width:860px;margin:2rem auto;padding:0 1rem;color:#1f2937;background:#fff}
+  h1{border-bottom:3px solid #2563eb;padding-bottom:.4rem}
+  .cards{display:flex;gap:1rem;flex-wrap:wrap}
+  .card{flex:1;min-width:160px;border:1px solid #e5e7eb;border-radius:10px;padding:1rem;text-align:center}
+  .num{font-size:2rem;font-weight:700;color:#2563eb}
+  .card.hot{border-color:#2563eb;background:#eff6ff}
+  .split{color:#6b7280;font-size:.95rem}
+  table{border-collapse:collapse;width:100%}
+  th,td{border:1px solid #e5e7eb;padding:.5rem;text-align:left}
+  .finding{border:1px solid #e5e7eb;border-left:4px solid #2563eb;border-radius:8px;padding:.8rem 1rem;margin:.8rem 0}
+  .finding h3{margin:.4rem 0}
+  .badge{color:#fff;border-radius:99px;padding:.15rem .6rem;font-size:.75rem;margin-right:.4rem}
+  .badge.save{background:#2563eb}
+  .fix{background:#f3f4f6;border-radius:6px;padding:.5rem}
+  .method{color:#6b7280;font-size:.9rem}
+  .demo{position:fixed;top:8px;right:8px;background:#dc2626;color:#fff;padding:.2rem .8rem;border-radius:6px;font-weight:700}
+  footer{margin-top:2rem;color:#9ca3af;font-size:.85rem}
+  #langbtn{position:fixed;top:8px;left:8px;border:1px solid #d1d5db;background:#fff;border-radius:6px;padding:.3rem .8rem;cursor:pointer}
+  section{display:none}
+  section.active{display:block}
+</style></head><body>
+<button id="langbtn">한국어 / English</button>
+
+  <section data-lang="en">
+    <div class="demo">DEMO REPORT</div>
+    <h1>CI Minutes Report</h1>
+    <h2>Executive summary</h2>
+    
+    <div class="cards">
+      <div class="card"><div class="num">$92.8</div><div>Monthly CI spend (measured, not estimated)</div></div>
+      
+      <div class="card hot"><div class="num">$565.38</div><div>Recoverable each month</div></div>
+      <div class="card"><div class="num">1789</div><div>min/mo</div></div>
+    </div>
+    <table><tr><th>runner</th><th>min/mo</th><th>$/mo</th><th>%</th></tr>
+    <tr><td>MACOS</td><td>610</td><td>$48.8</td><td>52.6%</td></tr><tr><td>UBUNTU</td><td>4820</td><td>$38.56</td><td>41.6%</td></tr><tr><td>WINDOWS</td><td>340</td><td>$5.44</td><td>5.9%</td></tr>
+    </table>
+    <p class="split">runner bill: <b>$28.77</b> ·
+      engineer wait time (at $60/h, 30% blocking): <b>$536.61</b></p>
+    <h2>Where the money goes (by job, measured)</h2><table>
+      <tr><th>job</th><th>runner</th><th>min/mo</th><th>$/mo</th></tr>
+      <tr><td>build-ios</td><td>MACOS</td><td>1288</td><td>$103.04</td></tr><tr><td>test-ios</td><td>MACOS</td><td>828</td><td>$66.24</td></tr><tr><td>lint</td><td>MACOS</td><td>552</td><td>$44.16</td></tr><tr><td>typecheck</td><td>MACOS</td><td>368</td><td>$29.44</td></tr><tr><td>unit-api</td><td>UBUNTU</td><td>1012</td><td>$8.10</td></tr>
+    </table>
+    <h2>Highest-leverage moves</h2>
+      <div class="finding">
+        <span class="badge save">+$51.52/mo</span>
+        <span class="badge" style="background:#6b7280">low</span>
+        <p>build-ios runs on MACOS for every run, but 50% of runs are off the default branch — restricting it there saves up to $51.52/mo.</p></div><div class="finding">
+        <span class="badge save">+$39.74/mo</span>
+        <span class="badge" style="background:#6b7280">medium</span>
+        <p>lint runs on MACOS (10x Linux) but does platform-neutral work — moving it to ubuntu-latest saves $39.74/mo.</p></div><div class="finding">
+        <span class="badge save">+$33.12/mo</span>
+        <span class="badge" style="background:#6b7280">low</span>
+        <p>test-ios runs on MACOS for every run, but 50% of runs are off the default branch — restricting it there saves up to $33.12/mo.</p></div><div class="finding">
+        <span class="badge save">+$26.5/mo</span>
+        <span class="badge" style="background:#6b7280">medium</span>
+        <p>typecheck runs on MACOS (10x Linux) but does platform-neutral work — moving it to ubuntu-latest saves $26.5/mo.</p></div>
+      <p><b>Identified moves total $150.88/month.</b></p>
+    <h2>Proof — did the fixes actually work? (since )</h2><table>
+      <tr><th>workflow</th><th>before</th><th>after</th><th>delta</th><th>runs</th></tr>
+      <tr><td>ci.yml</td><td>14.2 min</td><td>8.1 min</td>
+        <td><b>-6.1 min</b></td>
+        <td>63 ✅</td></tr><tr><td>release.yml</td><td>21.5 min</td><td>17.9 min</td>
+        <td><b>-3.6 min</b></td>
+        <td>11 ✅</td></tr>
+    </table>
+    
+    <h2>Workflow overview</h2>
+    <table><tr><th>Job</th><th>Runtime</th><th>Steps</th></tr><tr><td>job-build</td><td>3.2 min</td><td>4</td></tr><tr><td>job-lint</td><td>2.4 min</td><td>4</td></tr><tr><td>job-test</td><td>6.4 min</td><td>4</td></tr></table>
+    <h2>Findings (6)</h2>
+    
+    <div class="finding">
+      <span class="badge" style="background:#b45309">confidence: medium</span>
+      <span class="badge save">+2.1 min/run</span>
+      <h3>The project is built in 2 jobs</h3>
+      <p>Multiple jobs run a build (~3.1 min each). Downstream jobs can reuse the artifact instead.</p>
+      <p class="fix">💡 Build once, upload with actions/upload-artifact, then download in downstream jobs.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#b45309">confidence: medium</span>
+      <span class="badge save">+1.9 min/run</span>
+      <h3>Dependencies installed in 3 jobs</h3>
+      <p>Each job installs dependencies separately (~1.6 min each). A shared cache or a setup job removes the repetition.</p>
+      <p class="fix">💡 Share the dependency cache across jobs, or install once and pass node_modules/artifacts to downstream jobs.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#b45309">confidence: medium</span>
+      <span class="badge save">+1.1 min/run</span>
+      <h3>Dependency cache is not configured</h3>
+      <p>Install step took 1.6 min but no cache restore was found. Enabling the package cache typically removes most of this time.</p>
+      <p class="fix">💡 Add `cache: npm` (or pnpm/yarn) to setup-node, or use actions/cache keyed by your lockfile.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#b45309">confidence: medium</span>
+      <span class="badge save">+1.1 min/run</span>
+      <h3>Dependency cache is not configured</h3>
+      <p>Install step took 1.6 min but no cache restore was found. Enabling the package cache typically removes most of this time.</p>
+      <p class="fix">💡 Add `cache: npm` (or pnpm/yarn) to setup-node, or use actions/cache keyed by your lockfile.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#b45309">confidence: medium</span>
+      <span class="badge save">+1.1 min/run</span>
+      <h3>Dependency cache is not configured</h3>
+      <p>Install step took 1.6 min but no cache restore was found. Enabling the package cache typically removes most of this time.</p>
+      <p class="fix">💡 Add `cache: npm` (or pnpm/yarn) to setup-node, or use actions/cache keyed by your lockfile.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#6b7280">confidence: low</span>
+      <span class="badge save">+0.5 min/run</span>
+      <h3>checkout/setup repeated across 3 jobs</h3>
+      <p>Repeated checkout + runtime setup adds fixed overhead to every job.</p>
+      <p class="fix">💡 Consider a composite action for shared setup, or merge very short jobs.</p>
+    </div>
+    <h2>Methodology</h2>
+    <p class="method">Estimates are heuristic and conservative: per-rule savings are capped, and the total is capped at 60% of observed runtime. Cost uses the GitHub-hosted Linux runner rate ($0.008/min). Monthly figures assume 420 runs/month (override with --runs-per-month).</p>
+    <footer>Generated by cimeter · 2026-08-19</footer>
+  </section>
+
+  <section data-lang="ko">
+    <div class="demo">데모 리포트</div>
+    <h1>CI 분 절감 리포트</h1>
+    <h2>요약</h2>
+    
+    <div class="cards">
+      <div class="card"><div class="num">$92.8</div><div>월간 CI 지출 (추정 아님, 실측)</div></div>
+      
+      <div class="card hot"><div class="num">$565.38</div><div>매달 회수 가능한 금액</div></div>
+      <div class="card"><div class="num">1789</div><div>min/mo</div></div>
+    </div>
+    <table><tr><th>runner</th><th>min/mo</th><th>$/mo</th><th>%</th></tr>
+    <tr><td>MACOS</td><td>610</td><td>$48.8</td><td>52.6%</td></tr><tr><td>UBUNTU</td><td>4820</td><td>$38.56</td><td>41.6%</td></tr><tr><td>WINDOWS</td><td>340</td><td>$5.44</td><td>5.9%</td></tr>
+    </table>
+    <p class="split">러너 청구액: <b>$28.77</b> ·
+      엔지니어 대기 비용 (시간당 $60, 블로킹 30% 가정): <b>$536.61</b></p>
+    <h2>돈이 어디로 가는가 (잡 단위 실측)</h2><table>
+      <tr><th>job</th><th>runner</th><th>min/mo</th><th>$/mo</th></tr>
+      <tr><td>build-ios</td><td>MACOS</td><td>1288</td><td>$103.04</td></tr><tr><td>test-ios</td><td>MACOS</td><td>828</td><td>$66.24</td></tr><tr><td>lint</td><td>MACOS</td><td>552</td><td>$44.16</td></tr><tr><td>typecheck</td><td>MACOS</td><td>368</td><td>$29.44</td></tr><tr><td>unit-api</td><td>UBUNTU</td><td>1012</td><td>$8.10</td></tr>
+    </table>
+    <h2>효과가 가장 큰 조치</h2>
+      <div class="finding">
+        <span class="badge save">+$51.52/mo</span>
+        <span class="badge" style="background:#6b7280">low</span>
+        <p>build-ios runs on MACOS for every run, but 50% of runs are off the default branch — restricting it there saves up to $51.52/mo.</p></div><div class="finding">
+        <span class="badge save">+$39.74/mo</span>
+        <span class="badge" style="background:#6b7280">medium</span>
+        <p>lint runs on MACOS (10x Linux) but does platform-neutral work — moving it to ubuntu-latest saves $39.74/mo.</p></div><div class="finding">
+        <span class="badge save">+$33.12/mo</span>
+        <span class="badge" style="background:#6b7280">low</span>
+        <p>test-ios runs on MACOS for every run, but 50% of runs are off the default branch — restricting it there saves up to $33.12/mo.</p></div><div class="finding">
+        <span class="badge save">+$26.5/mo</span>
+        <span class="badge" style="background:#6b7280">medium</span>
+        <p>typecheck runs on MACOS (10x Linux) but does platform-neutral work — moving it to ubuntu-latest saves $26.5/mo.</p></div>
+      <p><b>확인된 조치 합계 월 $150.88.</b></p>
+    <h2>효과 증명 — 수정이 실제로 통했는가? ( 기준)</h2><table>
+      <tr><th>workflow</th><th>before</th><th>after</th><th>delta</th><th>runs</th></tr>
+      <tr><td>ci.yml</td><td>14.2 min</td><td>8.1 min</td>
+        <td><b>-6.1 min</b></td>
+        <td>63 ✅</td></tr><tr><td>release.yml</td><td>21.5 min</td><td>17.9 min</td>
+        <td><b>-3.6 min</b></td>
+        <td>11 ✅</td></tr>
+    </table>
+    
+    <h2>워크플로 개요</h2>
+    <table><tr><th>잡</th><th>실행시간</th><th>단계</th></tr><tr><td>job-build</td><td>3.2 min</td><td>4</td></tr><tr><td>job-lint</td><td>2.4 min</td><td>4</td></tr><tr><td>job-test</td><td>6.4 min</td><td>4</td></tr></table>
+    <h2>발견 사항 (6)</h2>
+    
+    <div class="finding">
+      <span class="badge" style="background:#b45309">신뢰도: medium</span>
+      <span class="badge save">+2.1 분/실행</span>
+      <h3>2개 잡에서 빌드를 반복합니다</h3>
+      <p>여러 잡이 각각 빌드를 수행합니다(각 ~3.1분). 다운스트림 잡은 아티팩트를 재사용할 수 있습니다.</p>
+      <p class="fix">💡 한 번 빌드 후 actions/upload-artifact로 올리고 다운스트림에서 download하세요.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#b45309">신뢰도: medium</span>
+      <span class="badge save">+1.9 분/실행</span>
+      <h3>3개 잡에서 의존성을 각각 설치합니다</h3>
+      <p>잡마다 의존성을 따로 설치합니다(각 ~1.6분). 캐시 공유나 셋업 잡으로 반복을 제거할 수 있습니다.</p>
+      <p class="fix">💡 잡 간 의존성 캐시를 공유하거나, 한 번 설치 후 아티팩트로 전달하세요.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#b45309">신뢰도: medium</span>
+      <span class="badge save">+1.1 분/실행</span>
+      <h3>의존성 캐시가 설정되어 있지 않습니다</h3>
+      <p>설치 단계가 1.6분 걸렸지만 캐시 복원 흔적이 없습니다. 패키지 캐시를 켜면 이 시간 대부분이 사라집니다.</p>
+      <p class="fix">💡 setup-node에 `cache: npm`(또는 pnpm/yarn)을 추가하거나, lockfile 기반 actions/cache를 사용하세요.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#b45309">신뢰도: medium</span>
+      <span class="badge save">+1.1 분/실행</span>
+      <h3>의존성 캐시가 설정되어 있지 않습니다</h3>
+      <p>설치 단계가 1.6분 걸렸지만 캐시 복원 흔적이 없습니다. 패키지 캐시를 켜면 이 시간 대부분이 사라집니다.</p>
+      <p class="fix">💡 setup-node에 `cache: npm`(또는 pnpm/yarn)을 추가하거나, lockfile 기반 actions/cache를 사용하세요.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#b45309">신뢰도: medium</span>
+      <span class="badge save">+1.1 분/실행</span>
+      <h3>의존성 캐시가 설정되어 있지 않습니다</h3>
+      <p>설치 단계가 1.6분 걸렸지만 캐시 복원 흔적이 없습니다. 패키지 캐시를 켜면 이 시간 대부분이 사라집니다.</p>
+      <p class="fix">💡 setup-node에 `cache: npm`(또는 pnpm/yarn)을 추가하거나, lockfile 기반 actions/cache를 사용하세요.</p>
+    </div>
+    <div class="finding">
+      <span class="badge" style="background:#6b7280">신뢰도: low</span>
+      <span class="badge save">+0.5 분/실행</span>
+      <h3>3개 잡에서 checkout/셋업이 반복됩니다</h3>
+      <p>반복되는 checkout + 런타임 셋업은 모든 잡에 고정 오버헤드를 더합니다.</p>
+      <p class="fix">💡 공통 셋업을 composite action으로 묶거나, 아주 짧은 잡은 병합을 검토하세요.</p>
+    </div>
+    <h2>산정 방식</h2>
+    <p class="method">추정은 휴리스틱 기반이며 보수적입니다: 규칙별 절감에 상한을 두고, 합계는 관측 실행시간의 60%를 넘지 않습니다. 비용은 GitHub 호스티드 Linux 러너 단가($0.008/분)를 사용합니다. 월 수치는 월 420회 실행 가정입니다(--runs-per-month로 변경 가능).</p>
+    <footer>cimeter로 생성됨 · 2026-08-19</footer>
+  </section>
+<script>
+  let lang = "en";
+  function apply(){document.querySelectorAll("section").forEach(s=>s.classList.toggle("active",s.dataset.lang===lang));}
+  document.getElementById("langbtn").onclick=()=>{lang=lang==="en"?"ko":"en";apply();};
+  apply();
+</script>
+</body></html>

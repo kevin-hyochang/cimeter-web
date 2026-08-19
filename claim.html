@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your cimeter license key</title>
+<script>
+  /* Same contract as the landing page: empty means same origin. */
+  window.CIMETER_API = "";
+</script>
+<style>
+  :root {
+    --bg: #fbfbfa; --surface: #ffffff; --line: #e4e4e2;
+    --ink: #18181b; --ink-2: #52525b; --ink-3: #6b6b68; --accent: #0f766e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0e11; --surface: #14161a; --line: #24272d;
+      --ink: #f2f3f5; --ink-2: #a8adb6; --ink-3: #7c828c; --accent: #4db6a8;
+    }
+  }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+    line-height: 1.6; display: grid; place-items: center; min-height: 100dvh; padding: 24px;
+  }
+  main { max-width: 620px; width: 100%; }
+  h1 { font-size: 1.65rem; letter-spacing: -0.025em; margin: 0 0 12px; }
+  p { margin: 0; color: var(--ink-2); }
+  code {
+    display: block; background: var(--surface); border: 1px dashed var(--accent);
+    padding: 16px 18px; border-radius: 10px; word-break: break-all; margin: 20px 0 0;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px;
+    color: var(--ink);
+  }
+  .note { color: var(--ink-3); font-size: 14px; margin-top: 16px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Thank you. / 감사합니다.</h1>
+  <p id="msg">Fetching your license key. / 라이선스 키를 가져오는 중입니다.</p>
+  <div id="out"></div>
+  <p class="note" id="hint"></p>
+</main>
+<script>
+const sid = new URLSearchParams(location.search).get("session_id");
+const api = window.CIMETER_API || "";
+const msg = document.getElementById("msg");
+const out = document.getElementById("out");
+
+async function claim(attempt = 0) {
+  try {
+    const r = await fetch(api + "/api/license/claim?session_id=" + encodeURIComponent(sid || ""));
+    const d = await r.json();
+    if (r.ok) {
+      msg.textContent = "Save this key now and set it as LICENSE_KEY. / 아래 키를 저장해 LICENSE_KEY로 설정하세요.";
+      const el = document.createElement("code");
+      el.textContent = d.licenseKey;          // textContent, so a key is never parsed as markup
+      out.replaceChildren(el);
+      document.getElementById("hint").textContent =
+        "cimeter spend --repo owner/name";
+      return;
+    }
+    if (attempt < 10) {
+      // The webhook may still be in flight right after checkout.
+      setTimeout(() => claim(attempt + 1), 2000);
+      return;
+    }
+    msg.textContent = d.error || "Not found. Please contact support. / 찾을 수 없습니다. 지원팀에 문의해 주세요.";
+  } catch {
+    msg.textContent = "Network error. Please retry. / 네트워크 오류입니다. 다시 시도해 주세요.";
+  }
+}
+claim();
+</script>
+</body>
+</html>
