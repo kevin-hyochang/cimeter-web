@@ -503,6 +503,7 @@ const I18N = {
     trial_ok: "Your key, valid for 14 days. Save it now.",
     trial_use: "Set it as LICENSE_KEY, then run: cimeter spend --repo owner/name",
     trial_err: "Enter a valid email address.",
+    trial_down: "The key service is not reachable right now. Email hello@cimeter.dev and a key will be sent back.",
     footer: "cimeter. Analyse locally, save monthly.",
     footer_legal: "Terms and privacy",
   },
@@ -575,6 +576,7 @@ const I18N = {
     trial_ok: "14일간 유효한 키입니다. 지금 저장하세요.",
     trial_use: "LICENSE_KEY로 설정한 뒤 cimeter spend --repo owner/name 를 실행하세요",
     trial_err: "올바른 이메일 주소를 입력하세요.",
+    trial_down: "키 발급 서비스에 연결할 수 없습니다. hello@cimeter.dev 로 메일 주시면 키를 보내드립니다.",
     footer: "cimeter. 로컬에서 분석하고, 매달 절감합니다.",
     footer_legal: "이용약관 및 개인정보처리방침",
   },
@@ -640,7 +642,9 @@ document.getElementById("trial-form").addEventListener("submit", async (e) => {
     out.querySelector(".keybox").textContent = d.licenseKey;
     out.querySelector(".note").textContent = I18N[lang].trial_use;
   } catch {
-    out.innerHTML = '<p class="err">network error</p>';
+    // 서버가 아직 없거나 내려간 경우. 방문자를 막다른 길에 두지 않는다.
+    out.innerHTML = '<p class="err"></p>';
+    out.querySelector("p").textContent = I18N[lang].trial_down;
   }
 });
 </script>
