@@ -415,6 +415,7 @@ Highest-leverage moves
         <button class="btn btn-primary" type="submit" data-i18n="trial_btn"></button>
       </form>
       <div id="trial-result" aria-live="polite"></div>
+      <p class="note" style="margin-top:14px"><a href="#trial" id="renew-link" data-i18n="renew_link"></a></p>
 <pre class="term" style="margin-top:26px"><span class="c"># install</span>
 npm install -g cimeter
 
@@ -503,6 +504,10 @@ const I18N = {
     trial_ok: "Your key, valid for 14 days. Save it now.",
     trial_use: "Set it as LICENSE_KEY, then run: cimeter spend --repo owner/name",
     trial_err: "Enter a valid email address.",
+    renew_link: "Already subscribed? Get a new key",
+    renew_back: "Not subscribed yet? Get a trial key",
+    renew_btn: "Send my new key",
+    renew_ok: "Your renewed key, valid for 35 days. Save it now.",
     trial_down: "The key service is not reachable right now. Open an issue at https://github.com/kevin-hyochang/cimeter-web/issues and a key will be sent back.",
     trial_sending: "Requesting your key.",
     trial_waking: "Waking the key service. This can take up to a minute on the first request of the day.",
@@ -578,6 +583,10 @@ const I18N = {
     trial_ok: "14일간 유효한 키입니다. 지금 저장하세요.",
     trial_use: "LICENSE_KEY로 설정한 뒤 cimeter spend --repo owner/name 를 실행하세요",
     trial_err: "올바른 이메일 주소를 입력하세요.",
+    renew_link: "이미 구독 중이신가요? 키 다시 받기",
+    renew_back: "아직 구독 전이신가요? 체험 키 받기",
+    renew_btn: "새 키 받기",
+    renew_ok: "35일간 유효한 갱신 키입니다. 지금 저장하세요.",
     trial_down: "키 발급 서비스에 연결할 수 없습니다. https://github.com/kevin-hyochang/cimeter-web/issues 에 이슈를 남겨주시면 키를 보내드립니다.",
     trial_sending: "키를 요청하는 중입니다.",
     trial_waking: "키 발급 서비스를 깨우는 중입니다. 하루 첫 요청은 1분까지 걸릴 수 있습니다.",
@@ -601,6 +610,7 @@ document.getElementById("langbtn").addEventListener("click", () => {
   lang = lang === "en" ? "ko" : "en";
   localStorage.setItem("cimeter-lang", lang);
   apply();
+  applyRenewLabels();
 });
 apply();
 
@@ -640,11 +650,11 @@ if (trialSection && "IntersectionObserver" in window) {
 }
 
 /* 콜드 스타트를 고려한 타임아웃. 기본값으로는 깨어나기 전에 끊긴다. */
-async function postActivate(email, timeoutMs) {
+async function postActivate(email, timeoutMs, path) {
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), timeoutMs);
   try {
-    return await fetch(API() + "/api/license/activate", {
+    return await fetch(API() + (path || "/api/license/activate"), {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ email, locale: lang }),
@@ -653,6 +663,19 @@ async function postActivate(email, timeoutMs) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+let renewMode = false;
+document.getElementById("renew-link").addEventListener("click", (e) => {
+  e.preventDefault();
+  renewMode = !renewMode;
+  applyRenewLabels();
+  document.getElementById("trial-email").focus();
+});
+function applyRenewLabels() {
+  const t = I18N[lang];
+  document.querySelector("#trial-form button").textContent = renewMode ? t.renew_btn : t.trial_btn;
+  document.getElementById("renew-link").textContent = renewMode ? t.renew_back : t.renew_link;
 }
 
 document.getElementById("trial-form").addEventListener("submit", async (e) => {
@@ -670,6 +693,7 @@ document.getElementById("trial-form").addEventListener("submit", async (e) => {
     return;
   }
 
+  const path = renewMode ? "/api/license/renew" : "/api/license/activate";
   btn.disabled = true;
   show("note", I18N[lang].trial_sending);
   // 응답이 늦으면 서버를 깨우는 중이라고 알린다. 침묵이 가장 나쁘다.
@@ -679,9 +703,9 @@ document.getElementById("trial-form").addEventListener("submit", async (e) => {
     await warmUp();
     let r;
     try {
-      r = await postActivate(email, 75000);
+      r = await postActivate(email, 75000, path);
     } catch {
-      r = await postActivate(email, 75000);   // 깨어나는 중 끊긴 경우 한 번 더
+      r = await postActivate(email, 75000, path);   // 깨어나는 중 끊긴 경우 한 번 더
     }
     clearTimeout(slow);
     const d = await r.json();
@@ -690,7 +714,7 @@ document.getElementById("trial-form").addEventListener("submit", async (e) => {
       return;
     }
     out.innerHTML = '<p style="margin-top:16px"><b></b></p><div class="keybox"></div><p class="note"></p>';
-    out.querySelector("b").textContent = I18N[lang].trial_ok;
+    out.querySelector("b").textContent = renewMode ? I18N[lang].renew_ok : I18N[lang].trial_ok;
     out.querySelector(".keybox").textContent = d.licenseKey;
     out.querySelector(".note").textContent = I18N[lang].trial_use;
   } catch {
