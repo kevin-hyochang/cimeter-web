@@ -32,36 +32,33 @@
     <h2>Executive summary</h2>
     
     <div class="cards">
-      <div class="card"><div class="num">$92.8</div><div>Monthly CI spend (measured, not estimated)</div></div>
+      <div class="card"><div class="num">$250.98</div><div>Monthly CI spend (measured, not estimated)</div></div>
       
-      <div class="card hot"><div class="num">$565.38</div><div>Recoverable each month</div></div>
-      <div class="card"><div class="num">1789</div><div>min/mo</div></div>
+      <div class="card hot"><div class="num">$77.8</div><div>Recoverable each month</div></div>
+      <div class="card"><div class="num">1255</div><div>min/mo</div></div>
     </div>
     <table><tr><th>runner</th><th>min/mo</th><th>$/mo</th><th>%</th></tr>
-    <tr><td>MACOS</td><td>610</td><td>$48.8</td><td>52.6%</td></tr><tr><td>UBUNTU</td><td>4820</td><td>$38.56</td><td>41.6%</td></tr><tr><td>WINDOWS</td><td>340</td><td>$5.44</td><td>5.9%</td></tr>
+    <tr><td>MACOS</td><td>3036</td><td>$242.88</td><td>96.8%</td></tr><tr><td>UBUNTU</td><td>1012</td><td>$8.1</td><td>3.2%</td></tr>
     </table>
-    <p class="split">runner bill: <b>$28.77</b> ·
-      engineer wait time (at $60/h, 30% blocking): <b>$536.61</b></p>
+    <p class="split">GitHub's own figure for this cycle: 5770 min used, 3000 included, 2770 billed.</p>
+    <p class="split">less the 3000 included minutes (worth $24.00 at the Linux rate, however they are spent) → expect to be billed about $226.98. Savings below are priced at list rate, which is what a minute you cut is worth once the allowance is gone.</p>
+    <p class="split">runner bill: <b>$77.8</b> ·
+      engineer wait time (at $60/h, 30% blocking): <b>$376.46</b></p>
+    <h2>Billed for nothing</h2><div class="finding"><span class="badge save">$18.60/mo</span><p>Superseded runs: 34 kept running after a newer push replaced them — 412 min burned on results nobody read, about $18.6/month.</p></div><div class="finding"><span class="badge save">$44.20/mo</span><p>nightly.yml has failed 21 times in a row and still runs every schedule. Nobody is reading the result — that is $44.20/month for nothing.</p></div><div class="finding"><span class="badge save">$2.10/mo</span><p>Artifacts: 11.3 GB live, $2.83/month. 8.4 GB of it is older than 14 days ($2.10/month) and would go away with a retention limit.</p></div><div class="finding"><span class="badge save">1.6 GB over the cache limit</span><p>You are 1.6 GB over the limit, so eviction is happening now. 7.2 GB has not been read in 14 days. Dropping it frees the limit without costing a single hit.</p></div>
     <h2>Where the money goes (by job, measured)</h2><table>
       <tr><th>job</th><th>runner</th><th>min/mo</th><th>$/mo</th></tr>
       <tr><td>build-ios</td><td>MACOS</td><td>1288</td><td>$103.04</td></tr><tr><td>test-ios</td><td>MACOS</td><td>828</td><td>$66.24</td></tr><tr><td>lint</td><td>MACOS</td><td>552</td><td>$44.16</td></tr><tr><td>typecheck</td><td>MACOS</td><td>368</td><td>$29.44</td></tr><tr><td>unit-api</td><td>UBUNTU</td><td>1012</td><td>$8.10</td></tr>
     </table>
     <h2>Highest-leverage moves</h2>
       <div class="finding">
-        <span class="badge save">+$51.52/mo</span>
-        <span class="badge" style="background:#6b7280">low</span>
-        <p>build-ios runs on MACOS for every run, but 50% of runs are off the default branch — restricting it there saves up to $51.52/mo.</p></div><div class="finding">
         <span class="badge save">+$39.74/mo</span>
-        <span class="badge" style="background:#6b7280">medium</span>
+        <span class="badge" style="background:#6b7280">high</span>
         <p>lint runs on MACOS (10x Linux) but does platform-neutral work — moving it to ubuntu-latest saves $39.74/mo.</p></div><div class="finding">
-        <span class="badge save">+$33.12/mo</span>
-        <span class="badge" style="background:#6b7280">low</span>
-        <p>test-ios runs on MACOS for every run, but 50% of runs are off the default branch — restricting it there saves up to $33.12/mo.</p></div><div class="finding">
         <span class="badge save">+$26.5/mo</span>
-        <span class="badge" style="background:#6b7280">medium</span>
+        <span class="badge" style="background:#6b7280">high</span>
         <p>typecheck runs on MACOS (10x Linux) but does platform-neutral work — moving it to ubuntu-latest saves $26.5/mo.</p></div>
-      <p><b>Identified moves total $150.88/month.</b></p>
-    <h2>Proof — did the fixes actually work? (since )</h2><table>
+      <p><b>Identified moves total $66.24/month.</b></p>
+    <h2>Proof — did the fixes actually work?</h2><table>
       <tr><th>workflow</th><th>before</th><th>after</th><th>delta</th><th>runs</th></tr>
       <tr><td>ci.yml</td><td>14.2 min</td><td>8.1 min</td>
         <td><b>-6.1 min</b></td>
@@ -70,6 +67,9 @@
         <td>11 ✅</td></tr>
     </table>
     
+    <h2>What to do, in order</h2><ol>
+      <li>Decide what nightly.yml is for — it has failed 21 times running and nobody fixed it — <b>$44.2/mo</b> <span class="badge" style="background:#6b7280">your call</span></li><li>Move lint to a cheaper runner — <b>$39.74/mo</b> <span class="badge" style="background:#6b7280">cimeter can do it</span></li><li>Move typecheck to a cheaper runner — <b>$26.5/mo</b> <span class="badge" style="background:#6b7280">cimeter can do it</span></li><li>Cancel runs a newer push has replaced (34 of them last window) — <b>$18.6/mo</b> <span class="badge" style="background:#6b7280">cimeter can do it</span></li><li>Put a retention limit on artifact uploads (8.4 GB is older than it needs to be) — <b>$2.1/mo</b> <span class="badge" style="background:#6b7280">cimeter can do it — takes effect on new runs</span></li><li>Clear 7.2 GB of caches nothing has read; you are 1.6 GB over the limit and being evicted <span class="badge" style="background:#6b7280">one setting</span></li>
+    </ol><p class="split">Each figure assumes the ones above it have not been done yet. These interact — moving a job off macOS also makes its cancelled runs cheaper — so re-run this after each change rather than adding the column up.</p>
     <h2>Workflow overview</h2>
     <table><tr><th>Job</th><th>Runtime</th><th>Steps</th></tr><tr><td>job-build</td><td>3.2 min</td><td>4</td></tr><tr><td>job-lint</td><td>2.4 min</td><td>4</td></tr><tr><td>job-test</td><td>6.4 min</td><td>4</td></tr></table>
     <h2>Findings (6)</h2>
@@ -117,8 +117,8 @@
       <p class="fix">💡 Consider a composite action for shared setup, or merge very short jobs.</p>
     </div>
     <h2>Methodology</h2>
-    <p class="method">Estimates are heuristic and conservative: per-rule savings are capped, and the total is capped at 60% of observed runtime. Cost uses the GitHub-hosted Linux runner rate ($0.008/min). Monthly figures assume 420 runs/month (override with --runs-per-month).</p>
-    <footer>Generated by cimeter · 2026-08-19</footer>
+    <p class="method">This is a sample report. The repository, its runs and every figure above are an illustrative fixture built to show the shape of a real report — they were not read from GitHub. On a genuine run this paragraph states where each number came from, and it is measured, not guessed.</p>
+    <footer>Generated by cimeter · 2026-09-04</footer>
   </section>
 
   <section data-lang="ko">
@@ -127,36 +127,33 @@
     <h2>요약</h2>
     
     <div class="cards">
-      <div class="card"><div class="num">$92.8</div><div>월간 CI 지출 (추정 아님, 실측)</div></div>
+      <div class="card"><div class="num">$250.98</div><div>월간 CI 지출 (추정 아님, 실측)</div></div>
       
-      <div class="card hot"><div class="num">$565.38</div><div>매달 회수 가능한 금액</div></div>
-      <div class="card"><div class="num">1789</div><div>min/mo</div></div>
+      <div class="card hot"><div class="num">$77.8</div><div>매달 회수 가능한 금액</div></div>
+      <div class="card"><div class="num">1255</div><div>min/mo</div></div>
     </div>
     <table><tr><th>runner</th><th>min/mo</th><th>$/mo</th><th>%</th></tr>
-    <tr><td>MACOS</td><td>610</td><td>$48.8</td><td>52.6%</td></tr><tr><td>UBUNTU</td><td>4820</td><td>$38.56</td><td>41.6%</td></tr><tr><td>WINDOWS</td><td>340</td><td>$5.44</td><td>5.9%</td></tr>
+    <tr><td>MACOS</td><td>3036</td><td>$242.88</td><td>96.8%</td></tr><tr><td>UBUNTU</td><td>1012</td><td>$8.1</td><td>3.2%</td></tr>
     </table>
-    <p class="split">러너 청구액: <b>$28.77</b> ·
-      엔지니어 대기 비용 (시간당 $60, 블로킹 30% 가정): <b>$536.61</b></p>
+    <p class="split">이번 주기에 대한 GitHub의 장부: 5770분 사용, 3000분 무료, 2770분 청구.</p>
+    <p class="split">여기서 무료 포함분 3000분(어느 러너에서 쓰든 Linux 요율로 $24.00어치)을 빼면 실제 청구는 약 $226.98입니다. 아래 절감액은 정가 기준입니다 — 할당량을 넘긴 뒤 1분을 줄이면 그만큼 아낍니다.</p>
+    <p class="split">러너 청구액: <b>$77.8</b> ·
+      엔지니어 대기 비용 (시간당 $60, 블로킹 30% 가정): <b>$376.46</b></p>
+    <h2>결과 없이 청구된 몫</h2><div class="finding"><span class="badge save">$18.60/mo</span><p>밀린 실행: 34회가 새 푸시에 대체되고도 끝까지 돌았습니다 — 아무도 보지 않는 결과에 412분, 월 약 $18.6입니다.</p></div><div class="finding"><span class="badge save">$44.20/mo</span><p>nightly.yml는 21회 연속 실패하면서도 예약마다 계속 돕니다. 결과를 읽는 사람이 없다는 뜻이고, 월 $44.20이 그대로 버려집니다.</p></div><div class="finding"><span class="badge save">$2.10/mo</span><p>아티팩트: 살아 있는 용량 11.3 GB, 월 $2.83. 이 중 8.4 GB는 14일보다 오래됐고(월 $2.10), 보관 기간만 정하면 사라집니다.</p></div><div class="finding"><span class="badge save">캐시 한도 1.6 GB 초과</span><p>한도를 1.6 GB 넘겼습니다. 지금 축출이 일어나고 있습니다. 7.2 GB는 14일 동안 한 번도 안 읽혔습니다. 이걸 지우면 히트를 하나도 잃지 않고 한도가 비워집니다.</p></div>
     <h2>돈이 어디로 가는가 (잡 단위 실측)</h2><table>
       <tr><th>job</th><th>runner</th><th>min/mo</th><th>$/mo</th></tr>
       <tr><td>build-ios</td><td>MACOS</td><td>1288</td><td>$103.04</td></tr><tr><td>test-ios</td><td>MACOS</td><td>828</td><td>$66.24</td></tr><tr><td>lint</td><td>MACOS</td><td>552</td><td>$44.16</td></tr><tr><td>typecheck</td><td>MACOS</td><td>368</td><td>$29.44</td></tr><tr><td>unit-api</td><td>UBUNTU</td><td>1012</td><td>$8.10</td></tr>
     </table>
     <h2>효과가 가장 큰 조치</h2>
       <div class="finding">
-        <span class="badge save">+$51.52/mo</span>
-        <span class="badge" style="background:#6b7280">low</span>
-        <p>build-ios runs on MACOS for every run, but 50% of runs are off the default branch — restricting it there saves up to $51.52/mo.</p></div><div class="finding">
         <span class="badge save">+$39.74/mo</span>
-        <span class="badge" style="background:#6b7280">medium</span>
+        <span class="badge" style="background:#6b7280">high</span>
         <p>lint runs on MACOS (10x Linux) but does platform-neutral work — moving it to ubuntu-latest saves $39.74/mo.</p></div><div class="finding">
-        <span class="badge save">+$33.12/mo</span>
-        <span class="badge" style="background:#6b7280">low</span>
-        <p>test-ios runs on MACOS for every run, but 50% of runs are off the default branch — restricting it there saves up to $33.12/mo.</p></div><div class="finding">
         <span class="badge save">+$26.5/mo</span>
-        <span class="badge" style="background:#6b7280">medium</span>
+        <span class="badge" style="background:#6b7280">high</span>
         <p>typecheck runs on MACOS (10x Linux) but does platform-neutral work — moving it to ubuntu-latest saves $26.5/mo.</p></div>
-      <p><b>확인된 조치 합계 월 $150.88.</b></p>
-    <h2>효과 증명 — 수정이 실제로 통했는가? ( 기준)</h2><table>
+      <p><b>확인된 조치 합계 월 $66.24.</b></p>
+    <h2>효과 증명 — 수정이 실제로 통했는가?</h2><table>
       <tr><th>workflow</th><th>before</th><th>after</th><th>delta</th><th>runs</th></tr>
       <tr><td>ci.yml</td><td>14.2 min</td><td>8.1 min</td>
         <td><b>-6.1 min</b></td>
@@ -165,6 +162,9 @@
         <td>11 ✅</td></tr>
     </table>
     
+    <h2>무엇부터 할 것인가</h2><ol>
+      <li>nightly.yml가 무엇을 위한 것인지 정하세요 — 21회 연속 실패했는데 아무도 안 고쳤습니다 — <b>$44.2/mo</b> <span class="badge" style="background:#6b7280">판단 필요</span></li><li>lint을 더 싼 러너로 옮기세요 — <b>$39.74/mo</b> <span class="badge" style="background:#6b7280">cimeter가 함</span></li><li>typecheck을 더 싼 러너로 옮기세요 — <b>$26.5/mo</b> <span class="badge" style="background:#6b7280">cimeter가 함</span></li><li>새 푸시에 밀린 실행을 취소하세요 (지난 창에서 34회) — <b>$18.6/mo</b> <span class="badge" style="background:#6b7280">cimeter가 함</span></li><li>아티팩트 업로드에 보관 기간을 두세요 (8.4 GB가 필요 이상으로 오래됐습니다) — <b>$2.1/mo</b> <span class="badge" style="background:#6b7280">cimeter가 함 — 다음 실행부터 적용</span></li><li>아무도 안 읽는 캐시 7.2 GB를 지우세요; 한도를 1.6 GB 넘겨 축출되는 중입니다 <span class="badge" style="background:#6b7280">설정 한 줄</span></li>
+    </ol><p class="split">각 금액은 위 항목을 아직 안 했다고 보고 잰 값입니다. 서로 영향을 줍니다 — macOS 잡을 옮기면 그 잡의 취소된 실행도 같이 싸집니다. 그러니 열을 더하지 말고, 하나 고칠 때마다 다시 재세요.</p>
     <h2>워크플로 개요</h2>
     <table><tr><th>잡</th><th>실행시간</th><th>단계</th></tr><tr><td>job-build</td><td>3.2 min</td><td>4</td></tr><tr><td>job-lint</td><td>2.4 min</td><td>4</td></tr><tr><td>job-test</td><td>6.4 min</td><td>4</td></tr></table>
     <h2>발견 사항 (6)</h2>
@@ -212,8 +212,8 @@
       <p class="fix">💡 공통 셋업을 composite action으로 묶거나, 아주 짧은 잡은 병합을 검토하세요.</p>
     </div>
     <h2>산정 방식</h2>
-    <p class="method">추정은 휴리스틱 기반이며 보수적입니다: 규칙별 절감에 상한을 두고, 합계는 관측 실행시간의 60%를 넘지 않습니다. 비용은 GitHub 호스티드 Linux 러너 단가($0.008/분)를 사용합니다. 월 수치는 월 420회 실행 가정입니다(--runs-per-month로 변경 가능).</p>
-    <footer>cimeter로 생성됨 · 2026-08-19</footer>
+    <p class="method">이 리포트는 예시입니다. 저장소, 실행 기록, 위의 모든 숫자는 실제 리포트의 형식을 보여주기 위해 만든 가상 자료이며 GitHub 에서 읽어온 것이 아닙니다. 실제 실행에서는 이 문단이 각 숫자가 어디서 나왔는지 밝히고, 그 숫자는 추정이 아니라 실측입니다.</p>
+    <footer>cimeter로 생성됨 · 2026-09-04</footer>
   </section>
 <script>
   let lang = "en";

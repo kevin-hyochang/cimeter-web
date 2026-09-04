@@ -11,6 +11,14 @@
      Pages serves static files only, so there is no API beside it), set this to
      the deployed server, e.g. "https://cimeter-api.onrender.com". */
   window.CIMETER_API = "https://cimeter-api.onrender.com";
+
+  /* Stripe Payment Links, one per plan. Until these are set the page has no
+     way to take money — the pricing card offers the trial instead of a dead
+     button. Create them in Stripe with metadata.plan = solo|team and success
+     URL = <this site>/claim.html?session_id={CHECKOUT_SESSION_ID}, then pass
+     them to scripts/sync-landing.mjs. */
+  window.CIMETER_BUY_SOLO = "";
+  window.CIMETER_BUY_TEAM = "";
 </script>
 <style>
   /* One theme family, light and dark, single accent. Tokens first. */
@@ -120,6 +128,11 @@
   .hero h1 { max-width: 15ch; }
   .hero .lede { margin-top: 20px; }
   .hero-cta { display: flex; gap: 12px; margin-top: 30px; flex-wrap: wrap; }
+  /* 그리드 자식은 기본이 min-width: auto 라 내용의 min-content 너비 아래로
+     줄지 않는다. 터미널 출력(pre)과 표가 그 안에 있어서, overflow-x: auto 를
+     걸어놨는데도 폰에서 페이지 전체가 가로로 밀렸다 — 375px 화면에서 문서
+     너비가 446px 였다. 결제를 받는 페이지가 폰에서 옆으로 흐르고 있었다. */
+  .hero-grid > *, .bill-grid > * { min-width: 0; }
   @media (max-width: 920px) {
     .hero-grid { grid-template-columns: 1fr; gap: 36px; }
     .hero { padding-top: 48px; padding-bottom: 60px; }
@@ -163,6 +176,16 @@
     background: var(--surface); border: 1px solid var(--line);
     border-radius: 12px; padding: 26px 28px; margin-top: 34px;
   }
+  /* 이 표는 아직 아무의 실적도 아니다. 예시라는 것이 표 자체에 붙어 있어야
+     한다 — "잰 것만 말한다"를 파는 페이지에서 재지 않은 숫자가 실적으로
+     읽히면, 손님이 그걸 알아챈 순간 나머지 숫자도 전부 의심받는다. */
+  .sample-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 620; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3); border: 1px dashed var(--line-strong);
+    border-radius: 999px; padding: 5px 12px; margin-bottom: 18px;
+  }
+  .proof-card table.data { opacity: .82; }
   .ok { color: var(--accent); font-weight: 620; }
   .muted { color: var(--ink-3); }
   .note { font-size: 13.5px; color: var(--ink-3); margin-top: 18px; max-width: 70ch; }
@@ -179,6 +202,7 @@
   .plan.paid li { border-color: color-mix(in srgb, var(--accent) 26%, transparent); }
   .tier-row { display: flex; gap: 28px; flex-wrap: wrap; }
   .tier { flex: 1; min-width: 140px; }
+  .tier-buy { margin-top: 12px; width: 100%; }
 
   details { border-top: 1px solid var(--line); padding: 18px 0; }
   details summary {
@@ -248,17 +272,21 @@
 <pre class="term" aria-label="cimeter command line output"><span class="c">$ cimeter spend --repo acme/mobile-app</span>
 
 Monthly CI spend <span class="c">(measured, not estimated)</span>
-  MACOS     3036 min   <b>$242.88</b>   77.6%
-  UBUNTU    1012 min   <b>$  8.10</b>   22.4%
+  MACOS     3036 min   <b>$242.88</b>   96.8%
+  UBUNTU    1012 min   <b>$  8.10</b>    3.2%
   <b>total     4048 min   $250.98</b>
 
-<span class="w">!</span> MACOS is 77.6% of your bill at 10x the
+<span class="w">!</span> MACOS is 96.8% of your bill at 10x the
   Linux rate. Highest leverage target.
 
-Highest-leverage moves
-  <span class="g">+$39.74/mo</span> lint runs on MACOS but does
-    platform-neutral work. Move to ubuntu-latest.
-  <span class="g">+$26.50/mo</span> typecheck, same finding.</pre>
+Where it goes <span class="c">(free)</span>
+  lint spends <b>$44.16</b>/mo on MACOS — 6 of its
+    6 steps were read, and none requires that runner.
+  typecheck spends <b>$29.44</b>/mo on MACOS — same.
+
+<span class="c">With a licence, the same run also prints:</span>
+  <span class="g">+$39.74/mo</span> move lint to ubuntu-latest
+  <span class="g">+$26.50/mo</span> move typecheck to ubuntu-latest</pre>
       </div>
     </div>
   </section>
@@ -278,13 +306,13 @@ Highest-leverage moves
             <td>macOS</td>
             <td class="n">3,036</td>
             <td class="n">$242.88</td>
-            <td style="width:26%"><span class="bar" style="width:78%"></span></td>
+            <td style="width:26%"><span class="bar" style="width:97%"></span></td>
           </tr>
           <tr>
             <td>Ubuntu</td>
             <td class="n">1,012</td>
             <td class="n">$8.10</td>
-            <td><span class="bar dim" style="width:22%"></span></td>
+            <td><span class="bar dim" style="width:3%"></span></td>
           </tr>
           <tr class="total">
             <td data-i18n="td_total"></td>
@@ -328,6 +356,7 @@ Highest-leverage moves
       <h2 data-i18n="proof_title"></h2>
       <p class="lede" style="margin-top:18px" data-i18n="proof_body"></p>
       <div class="proof-card">
+        <div class="sample-tag" data-i18n="proof_sample_tag"></div>
         <table class="data">
           <tr>
             <th data-i18n="th_job"></th><th data-i18n="th_applied"></th>
@@ -366,6 +395,7 @@ Highest-leverage moves
             <li data-i18n="free_2"></li>
             <li data-i18n="free_3"></li>
             <li data-i18n="free_4"></li>
+            <li data-i18n="free_5"></li>
           </ul>
         </div>
         <div class="plan paid">
@@ -373,10 +403,12 @@ Highest-leverage moves
             <div class="tier">
               <h3>Solo</h3>
               <div class="amt">$9<span>/mo</span></div>
+              <a class="btn btn-ghost tier-buy" data-buy="solo" href="#trial"></a>
             </div>
             <div class="tier">
               <h3>Team</h3>
               <div class="amt">$29<span>/mo</span></div>
+              <a class="btn btn-ghost tier-buy" data-buy="team" href="#trial"></a>
             </div>
           </div>
           <ul>
@@ -412,6 +444,8 @@ Highest-leverage moves
       <form id="trial-form" class="trial" novalidate>
         <label for="trial-email" style="position:absolute;left:-9999px" data-i18n="trial_label"></label>
         <input type="email" id="trial-email" placeholder="you@team.com" required autocomplete="email">
+        <input type="text" id="renew-key" placeholder="CMO...." autocomplete="off"
+               spellcheck="false" hidden style="display:none">
         <button class="btn btn-primary" type="submit" data-i18n="trial_btn"></button>
       </form>
       <div id="trial-result" aria-live="polite"></div>
@@ -441,6 +475,8 @@ const I18N = {
     hero_title: "Your CI bill, measured and then recovered",
     hero_sub: "cimeter reads the minutes GitHub actually charges you, prices each fix, opens the pull request, and proves the saving.",
     cta_trial: "Start 14-day free trial",
+    cta_trial_short: "Start free trial",
+    cta_buy: "Subscribe",
     cta_demo: "See a sample report",
 
     bill_eyebrow: "The part the invoice hides",
@@ -449,7 +485,7 @@ const I18N = {
     bill_note: "cimeter pulls per-runner billable minutes from the GitHub billing API, so these are measured figures rather than an estimate built on a guessed run count.",
     th_runner: "Runner", th_min: "Min / mo", th_usd: "Cost / mo", th_share: "Share",
     td_total: "Total",
-    bill_caption: "Measured on a sample repository across 60 completed runs.",
+    bill_caption: "Sample repository, measured over a 30-day window. The full report is one click away.",
 
     how_title: "Measure, recover, prove",
     how_1_k: "Measure",
@@ -465,22 +501,24 @@ const I18N = {
     how_4_h: "Check the saving actually landed",
     how_4_b: "Every applied change is recorded, and later runs are compared with the ones before it. If a job is moved back to the expensive runner, you get told.",
 
-    proof_eyebrow: "Track record",
-    proof_title: "The number we promised, next to the one you got",
+    proof_eyebrow: "How the saving is verified",
+    proof_title: "Every claim gets checked against what actually happened",
+    proof_sample_tag: "Example — not a customer result",
     proof_body: "Savings are reported as a range drawn from your own run history. When that range still includes zero, the result is left out of the total, because at that point it cannot be told apart from ordinary variance.",
     th_job: "Job", th_applied: "Applied", th_expected: "Expected", th_measured: "Measured", th_range: "95% range",
     td_pending: "collecting",
-    proof_note: "Confirmed so far: $27.90 per month from one move, against $39.74 expected. The second entry is still gathering runs on both sides of the change.",
+    proof_note: "The rows above are the sample project, shown to explain the format: what was expected, what the run history actually showed afterwards, and the range around it. cimeter is new and has no customer results to publish yet — when there are, they will replace this table. Your own ledger fills in from your own runs, and rows whose range still includes zero are left out of the total.",
 
     price_title: "Pricing",
     price_body: "Measuring what you spend is free and stays free. You pay once the tool starts recovering the money and showing that it did.",
     plan_free: "Free",
     free_1: "Measured monthly bill, per runner",
     free_2: "Organisation-wide spend ranking",
-    free_3: "Failed-run waste and workflow diagnostics",
-    free_4: "Fix preview, no license needed",
-    paid_1: "Per-job cost attribution",
-    paid_2: "Priced moves, ranked across repositories",
+    free_3: "Failed-run waste, storage and workflow diagnostics",
+    free_4: "Per-job cost, and which jobs need their expensive runner",
+    free_5: "Fix preview, no license needed",
+    paid_1: "What to do first — every finding ranked by money",
+    paid_2: "Where each job should move, and what it saves there",
     paid_3: "Automated fix pull requests",
     paid_4: "Savings proof and cumulative track record",
     paid_5: "Bilingual HTML reports and a weekly CI summary",
@@ -507,6 +545,8 @@ const I18N = {
     renew_link: "Already subscribed? Get a new key",
     renew_back: "Not subscribed yet? Get a trial key",
     renew_btn: "Send my new key",
+    renew_key_ph: "the key you have now (CMO....)",
+    renew_need_key: "Paste the licence key you already have — it proves the address is yours. Lost it? Contact us with your Stripe receipt; we verify the payment and resend the key.",
     renew_ok: "Your renewed key, valid for 35 days. Save it now.",
     trial_down: "The key service is not reachable right now. Open an issue at https://github.com/kevin-hyochang/cimeter-web/issues and a key will be sent back.",
     trial_sending: "Requesting your key.",
@@ -520,6 +560,8 @@ const I18N = {
     hero_title: "CI 청구서를 실측하고, 회수합니다",
     hero_sub: "GitHub이 실제로 청구하는 분을 읽어 조치마다 금액을 매기고, 수정 PR을 열고, 절감을 증명합니다.",
     cta_trial: "14일 무료 체험 시작",
+    cta_trial_short: "무료 체험 시작",
+    cta_buy: "구독하기",
     cta_demo: "샘플 리포트 보기",
 
     bill_eyebrow: "청구서가 감추는 부분",
@@ -528,7 +570,7 @@ const I18N = {
     bill_note: "cimeter는 GitHub 청구 API에서 러너별 청구 분을 직접 가져옵니다. 실행 횟수를 추측해 만든 추정치가 아니라 측정값입니다.",
     th_runner: "러너", th_min: "월 분", th_usd: "월 비용", th_share: "비중",
     td_total: "합계",
-    bill_caption: "표본 저장소의 완료된 실행 60건 기준 실측.",
+    bill_caption: "표본 저장소, 30일 창 기준 실측. 전체 리포트는 한 번 클릭하면 됩니다.",
 
     how_title: "측정하고, 회수하고, 증명합니다",
     how_1_k: "측정",
@@ -544,22 +586,24 @@ const I18N = {
     how_4_h: "절감이 실제로 남았는지 확인합니다",
     how_4_b: "적용한 변경을 기록해 두고 이후 실행을 이전과 비교합니다. 잡이 다시 비싼 러너로 되돌아가면 알려줍니다.",
 
-    proof_eyebrow: "실적",
-    proof_title: "약속한 금액과 실제로 받은 금액을 나란히",
+    proof_eyebrow: "절감을 어떻게 검증하는가",
+    proof_title: "약속한 금액을 실제로 일어난 일과 대조합니다",
+    proof_sample_tag: "예시 — 고객 실적이 아닙니다",
     proof_body: "절감은 사용자의 실행 이력에서 범위로 보고됩니다. 그 범위가 0을 포함하면 일반적인 편차와 구분할 수 없으므로 합계에서 제외합니다.",
     th_job: "잡", th_applied: "적용일", th_expected: "예상", th_measured: "실측", th_range: "95% 구간",
     td_pending: "수집 중",
-    proof_note: "현재까지 확인된 절감은 조치 1건에서 월 $27.90이며, 예상은 월 $39.74였습니다. 두 번째 항목은 변경 전후 실행을 아직 모으는 중입니다.",
+    proof_note: "위 표는 형식을 설명하기 위한 예시 프로젝트입니다 — 예상액, 변경 뒤 실행 기록이 실제로 보여준 값, 그리고 그 주변 구간. cimeter는 아직 새 제품이라 공개할 고객 실적이 없습니다. 생기면 이 표를 그 데이터로 바꿉니다. 당신의 원장은 당신의 실행 기록으로 채워지고, 구간이 0을 포함하는 항목은 합계에서 뺍니다.",
 
     price_title: "요금제",
     price_body: "지출을 측정하는 기능은 무료이고 계속 무료입니다. 도구가 실제로 금액을 회수하고 그것을 보여주는 시점부터 과금합니다.",
     plan_free: "무료",
     free_1: "러너별 실측 월 청구액",
     free_2: "조직 전체 지출 순위",
-    free_3: "실패 실행 낭비와 워크플로 진단",
-    free_4: "수정 미리보기, 라이선스 불필요",
-    paid_1: "잡 단위 비용 귀속",
-    paid_2: "저장소를 가로지르는 금액순 조치 목록",
+    free_3: "실패 실행 낭비, 스토리지, 워크플로 진단",
+    free_4: "잡별 비용과, 어느 잡이 그 비싼 러너를 정말 필요로 하는지",
+    free_5: "수정 미리보기, 라이선스 불필요",
+    paid_1: "무엇부터 할 것인가 — 모든 발견을 금액순으로",
+    paid_2: "각 잡을 어디로 옮겨야 하고 거기서 얼마가 되는지",
     paid_3: "자동 수정 PR",
     paid_4: "절감 증명과 누적 실적",
     paid_5: "한/영 HTML 리포트와 주간 CI 요약",
@@ -586,6 +630,8 @@ const I18N = {
     renew_link: "이미 구독 중이신가요? 키 다시 받기",
     renew_back: "아직 구독 전이신가요? 체험 키 받기",
     renew_btn: "새 키 받기",
+    renew_key_ph: "지금 가지고 계신 키 (CMO....)",
+    renew_need_key: "지금 가지고 계신 라이선스 키를 붙여넣으세요 — 그 주소가 본인 것임을 증명합니다. 잃어버리셨다면 Stripe 영수증과 함께 문의하세요. 결제를 확인하고 키를 다시 보내드립니다.",
     renew_ok: "35일간 유효한 갱신 키입니다. 지금 저장하세요.",
     trial_down: "키 발급 서비스에 연결할 수 없습니다. https://github.com/kevin-hyochang/cimeter-web/issues 에 이슈를 남겨주시면 키를 보내드립니다.",
     trial_sending: "키를 요청하는 중입니다.",
@@ -604,6 +650,16 @@ function apply() {
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const v = I18N[lang][el.dataset.i18n];
     if (v !== undefined) el.textContent = v;
+  });
+  // 결제 링크가 없으면 죽은 버튼을 두지 않는다. 이 페이지에는 넉 달 동안
+  // 돈을 낼 방법이 아예 없었다 — 요금 카드의 버튼까지 체험으로 갔다.
+  // 링크가 생기면 그때부터 구독 버튼이 된다.
+  const links = { solo: window.CIMETER_BUY_SOLO, team: window.CIMETER_BUY_TEAM };
+  document.querySelectorAll("[data-buy]").forEach((el) => {
+    const url = links[el.dataset.buy];
+    el.href = url || "#trial";
+    el.textContent = I18N[lang][url ? "cta_buy" : "cta_trial_short"];
+    if (url) { el.rel = "noopener"; }
   });
 }
 document.getElementById("langbtn").addEventListener("click", () => {
@@ -650,14 +706,14 @@ if (trialSection && "IntersectionObserver" in window) {
 }
 
 /* 콜드 스타트를 고려한 타임아웃. 기본값으로는 깨어나기 전에 끊긴다. */
-async function postActivate(email, timeoutMs, path) {
+async function postActivate(email, timeoutMs, path, extra) {
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), timeoutMs);
   try {
     return await fetch(API() + (path || "/api/license/activate"), {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email, locale: lang }),
+      body: JSON.stringify({ email, locale: lang, currentKey: extra || undefined }),
       signal: ac.signal,
     });
   } finally {
@@ -676,6 +732,12 @@ function applyRenewLabels() {
   const t = I18N[lang];
   document.querySelector("#trial-form button").textContent = renewMode ? t.renew_btn : t.trial_btn;
   document.getElementById("renew-link").textContent = renewMode ? t.renew_back : t.renew_link;
+  // 갱신은 지금 가진 키로 주소 소유를 증명한다. 이메일만 받으면 아무나
+  // 남의 유료 키를 받아갈 수 있었다.
+  const keyBox = document.getElementById("renew-key");
+  keyBox.hidden = !renewMode;
+  keyBox.style.display = renewMode ? "" : "none";
+  keyBox.placeholder = t.renew_key_ph;
 }
 
 document.getElementById("trial-form").addEventListener("submit", async (e) => {
@@ -693,6 +755,11 @@ document.getElementById("trial-form").addEventListener("submit", async (e) => {
     return;
   }
 
+  const currentKey = document.getElementById("renew-key").value.trim();
+  if (renewMode && !currentKey.startsWith("CMO.")) {
+    show("err", I18N[lang].renew_need_key);
+    return;
+  }
   const path = renewMode ? "/api/license/renew" : "/api/license/activate";
   btn.disabled = true;
   show("note", I18N[lang].trial_sending);
@@ -703,9 +770,9 @@ document.getElementById("trial-form").addEventListener("submit", async (e) => {
     await warmUp();
     let r;
     try {
-      r = await postActivate(email, 75000, path);
+      r = await postActivate(email, 75000, path, currentKey);
     } catch {
-      r = await postActivate(email, 75000, path);   // 깨어나는 중 끊긴 경우 한 번 더
+      r = await postActivate(email, 75000, path, currentKey);   // 깨어나는 중 끊긴 경우 한 번 더
     }
     clearTimeout(slow);
     const d = await r.json();
