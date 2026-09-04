@@ -35,6 +35,19 @@
   }
   .note { color: var(--ink-3); font-size: 14px; margin-top: 16px; }
   a { color: var(--accent); }
+  form { margin-top: 20px; display: grid; gap: 10px; }
+  label { font-size: 14px; color: var(--ink-2); }
+  input {
+    font: inherit; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 14px;
+    padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface); color: var(--ink); letter-spacing: .02em;
+  }
+  button {
+    font: inherit; font-weight: 560; height: 44px; border-radius: 10px; border: 0; cursor: pointer;
+    background: var(--accent); color: #fff;
+  }
+  button:disabled { opacity: .6; cursor: default; }
+  input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -42,6 +55,11 @@
   <h1>Thank you. / 감사합니다.</h1>
   <p id="msg">Fetching your license key. / 라이선스 키를 가져오는 중입니다.</p>
   <div id="out"></div>
+  <form id="gr" hidden autocomplete="off">
+    <label for="gk">Paste the license key from your Gumroad receipt. / Gumroad 영수증의 라이선스 키를 붙여넣으세요.</label>
+    <input id="gk" placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX" spellcheck="false" required>
+    <button type="submit" id="gb">Get my cimeter key / cimeter 키 받기</button>
+  </form>
   <p class="note" id="hint"></p>
 </main>
 <script>
@@ -67,10 +85,44 @@ function dead(text) {
   hint.appendChild(a);
 }
 
+/* Gumroad 로 산 사람은 영수증에 라이선스 키가 있다. 그걸 붙여넣으면 우리 키가
+   나온다. 갱신도 같은 자리다 — 35일 뒤 같은 키를 다시 붙여넣으면 된다. */
+const form = document.getElementById("gr");
+const gk = document.getElementById("gk");
+const gb = document.getElementById("gb");
+function showKey(d) {
+  msg.textContent = "Save this key now and set it as LICENSE_KEY. / 아래 키를 저장해 LICENSE_KEY로 설정하세요.";
+  const el = document.createElement("code");
+  el.textContent = d.licenseKey;          // textContent, so a key is never parsed as markup
+  out.replaceChildren(el);
+  hint.textContent = (d.expiresAt ? "Valid until " + d.expiresAt + " — paste the same Gumroad key here again to renew. / " +
+    d.expiresAt + "까지 유효 — 갱신은 같은 Gumroad 키를 여기 다시 붙여넣으면 됩니다. " : "") +
+    "cimeter spend --repo owner/name";
+  form.hidden = true;
+}
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  gb.disabled = true;
+  msg.textContent = "Checking with Gumroad. / Gumroad 에 확인하는 중입니다.";
+  fetch(api + "/api/health", { cache: "no-store" }).catch(() => null);   // 잠든 서버를 깨운다
+  try {
+    const r = await fetch(api + "/api/license/claim", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ gumroadKey: gk.value.trim() }) });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok && d.licenseKey) { showKey(d); return; }
+    msg.textContent = d.error || ("Could not verify that key (HTTP " + r.status + "). / 키를 확인하지 못했습니다.");
+  } catch {
+    msg.textContent = "Could not reach the server. Try again in a moment. / 서버에 연결하지 못했습니다. 잠시 뒤 다시 시도하세요.";
+  } finally {
+    gb.disabled = false;
+  }
+});
+
 if (!sid) {
-  dead("This link is missing its session id. Use the page Stripe sent you to right after " +
-       "checkout, or contact us with your receipt. / 이 링크에 session id가 없습니다. 결제 직후 " +
-       "Stripe 가 보내준 페이지를 쓰시거나, 영수증과 함께 문의해 주세요.");
+  msg.textContent = "Bought cimeter on Gumroad? / Gumroad 에서 구매하셨나요?";
+  form.hidden = false;
+  gk.focus();
 } else {
   /* 무료 호스팅은 잠들어 있다가 첫 요청에 최대 75초까지 걸린다. 랜딩은 이걸
      대비하는데 이 페이지는 안 했다 — 결제 직후 서버가 자고 있으면 20초 만에
@@ -94,14 +146,7 @@ async function claim(attempt = 0) {
     const r = await withTimeout(
       api + "/api/license/claim?session_id=" + encodeURIComponent(sid), 75000);
     const d = await r.json().catch(() => ({}));
-    if (r.ok && d.licenseKey) {
-      msg.textContent = "Save this key now and set it as LICENSE_KEY. / 아래 키를 저장해 LICENSE_KEY로 설정하세요.";
-      const el = document.createElement("code");
-      el.textContent = d.licenseKey;          // textContent, so a key is never parsed as markup
-      out.replaceChildren(el);
-      hint.textContent = "cimeter spend --repo owner/name";
-      return;
-    }
+    if (r.ok && d.licenseKey) { showKey(d); return; }
     if (attempt < MAX_ATTEMPTS) {
       if (attempt === 2) {
         msg.textContent = "Still waiting for the payment to settle. This can take a minute. / " +

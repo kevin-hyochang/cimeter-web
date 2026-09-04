@@ -12,11 +12,10 @@
      the deployed server, e.g. "https://cimeter-api.onrender.com". */
   window.CIMETER_API = "https://cimeter-api.onrender.com";
 
-  /* Stripe Payment Links, one per plan. Until these are set the page has no
-     way to take money — the pricing card offers the trial instead of a dead
-     button. Create them in Stripe with metadata.plan = solo|team and success
-     URL = <this site>/claim.html?session_id={CHECKOUT_SESSION_ID}, then pass
-     them to scripts/sync-landing.mjs. */
+  /* Checkout links, one per plan — a Gumroad product page or a Stripe Payment
+     Link. Until these are set the page has no way to take money, so the pricing
+     card offers the trial instead of a dead button. Pass them to
+     scripts/sync-landing.mjs as BUY_SOLO / BUY_TEAM. */
   window.CIMETER_BUY_SOLO = "";
   window.CIMETER_BUY_TEAM = "";
 </script>
@@ -450,6 +449,7 @@ Where it goes <span class="c">(free)</span>
       </form>
       <div id="trial-result" aria-live="polite"></div>
       <p class="note" style="margin-top:14px"><a href="#trial" id="renew-link" data-i18n="renew_link"></a></p>
+      <p class="note"><a href="claim.html" data-i18n="claim_link"></a></p>
 <pre class="term" style="margin-top:26px"><span class="c"># install</span>
 npm install -g cimeter
 
@@ -543,10 +543,11 @@ const I18N = {
     trial_use: "Set it as LICENSE_KEY, then run: cimeter spend --repo owner/name",
     trial_err: "Enter a valid email address.",
     renew_link: "Already subscribed? Get a new key",
+    claim_link: "Bought on Gumroad? Turn the license key on your receipt into your cimeter key — and renew with it later",
     renew_back: "Not subscribed yet? Get a trial key",
     renew_btn: "Send my new key",
     renew_key_ph: "the key you have now (CMO....)",
-    renew_need_key: "Paste the licence key you already have — it proves the address is yours. Lost it? Contact us with your Stripe receipt; we verify the payment and resend the key.",
+    renew_need_key: "Paste the licence key you already have — it proves the address is yours. Bought on Gumroad? Use the claim page with the license key from your receipt instead; it never expires and renews you too.",
     renew_ok: "Your renewed key, valid for 35 days. Save it now.",
     trial_down: "The key service is not reachable right now. Open an issue at https://github.com/kevin-hyochang/cimeter-web/issues and a key will be sent back.",
     trial_sending: "Requesting your key.",
@@ -628,10 +629,11 @@ const I18N = {
     trial_use: "LICENSE_KEY로 설정한 뒤 cimeter spend --repo owner/name 를 실행하세요",
     trial_err: "올바른 이메일 주소를 입력하세요.",
     renew_link: "이미 구독 중이신가요? 키 다시 받기",
+    claim_link: "Gumroad 에서 구매하셨나요? 영수증의 라이선스 키로 cimeter 키를 받으세요 — 갱신도 같은 키로",
     renew_back: "아직 구독 전이신가요? 체험 키 받기",
     renew_btn: "새 키 받기",
     renew_key_ph: "지금 가지고 계신 키 (CMO....)",
-    renew_need_key: "지금 가지고 계신 라이선스 키를 붙여넣으세요 — 그 주소가 본인 것임을 증명합니다. 잃어버리셨다면 Stripe 영수증과 함께 문의하세요. 결제를 확인하고 키를 다시 보내드립니다.",
+    renew_need_key: "지금 가지고 계신 라이선스 키를 붙여넣으세요 — 그 주소가 본인 것임을 증명합니다. Gumroad 에서 구매하셨다면 영수증의 라이선스 키로 claim 페이지를 쓰세요. 그 키는 만료되지 않고 갱신에도 쓰입니다.",
     renew_ok: "35일간 유효한 갱신 키입니다. 지금 저장하세요.",
     trial_down: "키 발급 서비스에 연결할 수 없습니다. https://github.com/kevin-hyochang/cimeter-web/issues 에 이슈를 남겨주시면 키를 보내드립니다.",
     trial_sending: "키를 요청하는 중입니다.",
