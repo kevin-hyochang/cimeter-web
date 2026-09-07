@@ -16,8 +16,8 @@
      Link. Until these are set the page has no way to take money, so the pricing
      card offers the trial instead of a dead button. Pass them to
      scripts/sync-landing.mjs as BUY_SOLO / BUY_TEAM. */
-  window.CIMETER_BUY_SOLO = "https://etudes6.gumroad.com/l/cimeter-solo";
-  window.CIMETER_BUY_TEAM = "https://etudes6.gumroad.com/l/cimeter-team";
+  window.CIMETER_BUY_SOLO = "";
+  window.CIMETER_BUY_TEAM = "";
 </script>
 <style>
   /* One theme family, light and dark, single accent. Tokens first. */
@@ -201,6 +201,7 @@
   .plan.paid li { border-color: color-mix(in srgb, var(--accent) 26%, transparent); }
   .tier-row { display: flex; gap: 28px; flex-wrap: wrap; }
   .tier { flex: 1; min-width: 140px; }
+  .tier-scope { margin-top: 6px; font-size: 13.5px; color: var(--ink-3); }
   .tier-buy { margin-top: 12px; width: 100%; }
 
   details { border-top: 1px solid var(--line); padding: 18px 0; }
@@ -402,11 +403,13 @@ Where it goes <span class="c">(free)</span>
             <div class="tier">
               <h3>Solo</h3>
               <div class="amt">$9<span>/mo</span></div>
+              <div class="tier-scope" data-i18n="tier_scope_solo"></div>
               <a class="btn btn-ghost tier-buy" data-buy="solo" href="#trial"></a>
             </div>
             <div class="tier">
               <h3>Team</h3>
               <div class="amt">$29<span>/mo</span></div>
+              <div class="tier-scope" data-i18n="tier_scope_team"></div>
               <a class="btn btn-ghost tier-buy" data-buy="team" href="#trial"></a>
             </div>
           </div>
@@ -448,7 +451,7 @@ Where it goes <span class="c">(free)</span>
         <button class="btn btn-primary" type="submit" data-i18n="trial_btn"></button>
       </form>
       <div id="trial-result" aria-live="polite"></div>
-      <p class="note" style="margin-top:14px"><a href="#trial" id="renew-link" data-i18n="renew_link"></a></p>
+      <p class="note" style="margin-top:14px"><a href="claim.html" id="renew-link" data-i18n="renew_link"></a></p>
       <p class="note"><a href="claim.html" data-i18n="claim_link"></a></p>
 <pre class="term" style="margin-top:26px"><span class="c"># install</span>
 npm install -g cimeter
@@ -517,6 +520,8 @@ const I18N = {
     free_3: "Failed-run waste, storage and workflow diagnostics",
     free_4: "Per-job cost, and which jobs need their expensive runner",
     free_5: "Fix preview, no license needed",
+    tier_scope_solo: "everything, one repository at a time",
+    tier_scope_team: "+ org-wide prescriptions across every repository",
     paid_1: "What to do first — every finding ranked by money",
     paid_2: "Where each job should move, and what it saves there",
     paid_3: "Automated fix pull requests",
@@ -542,7 +547,7 @@ const I18N = {
     trial_ok: "Your key, valid for 14 days. Save it now.",
     trial_use: "Set it as LICENSE_KEY, then run: cimeter spend --repo owner/name",
     trial_err: "Enter a valid email address.",
-    renew_link: "Already subscribed? Get a new key",
+    renew_link: "Already subscribed? Renew with the licence key on your Gumroad receipt",
     claim_link: "Bought on Gumroad? Turn the license key on your receipt into your cimeter key — and renew with it later",
     renew_back: "Not subscribed yet? Get a trial key",
     renew_btn: "Send my new key",
@@ -603,6 +608,8 @@ const I18N = {
     free_3: "실패 실행 낭비, 스토리지, 워크플로 진단",
     free_4: "잡별 비용과, 어느 잡이 그 비싼 러너를 정말 필요로 하는지",
     free_5: "수정 미리보기, 라이선스 불필요",
+    tier_scope_solo: "저장소 단위의 전부",
+    tier_scope_team: "+ 조직 전체 처방, 모든 저장소를 금액순으로",
     paid_1: "무엇부터 할 것인가 — 모든 발견을 금액순으로",
     paid_2: "각 잡을 어디로 옮겨야 하고 거기서 얼마가 되는지",
     paid_3: "자동 수정 PR",
@@ -628,7 +635,7 @@ const I18N = {
     trial_ok: "14일간 유효한 키입니다. 지금 저장하세요.",
     trial_use: "LICENSE_KEY로 설정한 뒤 cimeter spend --repo owner/name 를 실행하세요",
     trial_err: "올바른 이메일 주소를 입력하세요.",
-    renew_link: "이미 구독 중이신가요? 키 다시 받기",
+    renew_link: "이미 구독 중이신가요? Gumroad 영수증의 라이선스 키로 갱신하세요",
     claim_link: "Gumroad 에서 구매하셨나요? 영수증의 라이선스 키로 cimeter 키를 받으세요 — 갱신도 같은 키로",
     renew_back: "아직 구독 전이신가요? 체험 키 받기",
     renew_btn: "새 키 받기",
@@ -724,12 +731,10 @@ async function postActivate(email, timeoutMs, path, extra) {
 }
 
 let renewMode = false;
-document.getElementById("renew-link").addEventListener("click", (e) => {
-  e.preventDefault();
-  renewMode = !renewMode;
-  applyRenewLabels();
-  document.getElementById("trial-email").focus();
-});
+// 갱신 링크는 이제 claim.html 로 가는 평범한 링크다. 예전에는 여기서
+// preventDefault 로 /api/license/renew 폼을 토글했는데, 그 경로는 Stripe
+// 구독 조회가 필요하고 운영은 Gumroad 뿐이라 모든 유료 고객에게 404 만
+// 돌려주는 죽은 문이었다. Stripe 를 다시 켜면 이 토글도 되살린다.
 function applyRenewLabels() {
   const t = I18N[lang];
   document.querySelector("#trial-form button").textContent = renewMode ? t.renew_btn : t.trial_btn;
