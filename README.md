@@ -10,7 +10,7 @@
 |---|---|
 | `index.html` | 랜딩 (한/영 토글, 라이트·다크) |
 | `legal.html` | 이용약관 및 개인정보처리방침 |
-| `claim.html` | Stripe 결제 완료 후 라이선스 키 수령 |
+| `claim.html` | Gumroad 영수증의 라이선스 키(또는 Stripe 결제 세션)로 cimeter 키 수령·갱신 |
 | `demo-report.html` | 샘플 리포트 |
 
 ## 직접 수정하지 않습니다
@@ -18,10 +18,12 @@
 이 파일들은 제품 저장소에서 생성해 동기화합니다. 여기서 직접 고치면 다음 동기화 때 덮어써집니다.
 
 ```bash
+BUY_SOLO=https://etudes6.gumroad.com/l/cimeter-solo \
+BUY_TEAM=https://etudes6.gumroad.com/l/cimeter-team \
 node scripts/sync-landing.mjs ../cimeter-web https://cimeter-api.onrender.com
 ```
 
-동기화 스크립트가 복사하면서 라이선스 서버 주소를 주입합니다. 제품 저장소의 원본은 같은 출처를 가리킨 채로 두어야, 로컬에서 서버를 띄웠을 때 그 서버에 붙습니다.
+동기화 스크립트가 복사하면서 라이선스 서버 주소와 Gumroad 결제 링크를 주입합니다. 결제 링크(`BUY_SOLO`/`BUY_TEAM`)가 없으면 스크립트가 거절합니다 — 링크 없이 돈 동기화(33f23d8)가 요금 카드의 구독 버튼을 지운 적이 있습니다. 제품 저장소의 원본은 같은 출처를 가리킨 채로 두어야, 로컬에서 서버를 띄웠을 때 그 서버에 붙습니다.
 
 ## 연결된 서버
 

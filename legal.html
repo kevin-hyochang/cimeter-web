@@ -2,27 +2,42 @@
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>cimeter — Terms & Privacy</title>
 <style>body{font-family:-apple-system,'Segoe UI','Malgun Gothic',sans-serif;max-width:760px;margin:2rem auto;padding:0 1rem;color:#1f2937;line-height:1.6}
-h1{border-bottom:3px solid #2563eb;padding-bottom:.4rem} h2{margin-top:2rem} .muted{color:#6b7280}</style>
+h1{border-bottom:3px solid #2563eb;padding-bottom:.4rem} h2{margin-top:2rem} .muted{color:#6b7280}
+table.biz{border-collapse:collapse} table.biz th,table.biz td{text-align:left;padding:.25rem 1rem .25rem 0;vertical-align:top} table.biz th{font-weight:600}</style>
 </head><body>
 <h1>Terms of Service & Privacy Policy / 이용약관 및 개인정보처리방침</h1>
-<p class="muted">Last updated: 2026-08-19</p>
+<p class="muted">Last updated: 2026-10-12</p>
 
 <h2>Privacy / 개인정보</h2>
-<p><b>EN</b> — cimeter analyzes CI logs <b>100% locally on your machine</b>. Log contents are never uploaded to our servers. License keys are verified offline. The only personal data we store is the email address you provide when requesting a trial or purchasing a subscription, used solely for license issuance and support. We do not sell or share it. To delete your data, email support with your license email.</p>
+<p><b>EN</b> — cimeter analyzes CI logs <b>100% locally on your machine</b>. Log contents are never uploaded to our servers. License keys are verified offline. The only personal data we store is the email address you provide when requesting a trial or purchasing a subscription, used solely for license issuance and support. We do not sell or share it. To delete your data, email <a href="mailto:etudes0803@gmail.com">etudes0803@gmail.com</a> from your license email.</p>
 <p class="muted"><b>Fetch mode</b> — when you use --repo/--run-id, your machine calls the GitHub API directly with <i>your own</i> token; nothing passes through our servers. / --repo/--run-id 사용 시 사용자 머신이 <i>본인 토큰</i>으로 GitHub API를 직접 호출하며, 당사 서버를 경유하지 않습니다.</p>
-<p><b>KO</b> — cimeter는 CI 로그를 <b>사용자 머신에서 100% 로컬로</b> 분석합니다. 로그 내용은 서버로 전송되지 않으며, 라이선스 키도 오프라인으로 검증됩니다. 저장하는 개인정보는 체험/구독 신청 시 입력한 이메일뿐이며, 라이선스 발급과 지원 목적으로만 사용합니다. 판매·공유하지 않으며, 삭제를 원하시면 라이선스 이메일로 지원팀에 요청하세요.</p>
+<p><b>KO</b> — cimeter는 CI 로그를 <b>사용자 머신에서 100% 로컬로</b> 분석합니다. 로그 내용은 서버로 전송되지 않으며, 라이선스 키도 오프라인으로 검증됩니다. 저장하는 개인정보는 체험/구독 신청 시 입력한 이메일뿐이며, 라이선스 발급과 지원 목적으로만 사용합니다. 판매·공유하지 않으며, 삭제를 원하시면 라이선스 이메일로 <a href="mailto:etudes0803@gmail.com">etudes0803@gmail.com</a> 에 요청하세요.</p>
 
 <h2>License / 라이선스</h2>
 <p><b>EN</b> — Measurement is free and may be used without restriction: your measured bill, which jobs and runners spend it, static workflow diagnostics, matrix-leg analysis, policy baselines, organisation-wide totals, and <code>auto-pr</code> dry-runs. An active subscription key is required for the prescriptive features — the ranked plan with destinations and recoverable amounts, <code>auto-pr --fix-pr</code> (opening the PR), automatic PR-guard comments, savings proof and the ledger, HTML reports, and organisation-wide prescriptions (Team only). Keys are issued per developer (Solo) or per team (Team), are valid for the paid period plus a short grace window, and may not be shared publicly. Payment is processed by Gumroad (or Stripe); we never see your card details. A Gumroad license key from your receipt is the proof of purchase you paste to receive or renew your cimeter key.</p>
 <p><b>KO</b> — <b>측정은 무료</b>이며 제한 없이 사용할 수 있습니다: 실측 청구서, 어느 잡과 러너가 그 돈을 쓰는지, 워크플로 정적 진단, 매트릭스 레그 분석, 정책 기준선, 조직 전체 집계, <code>auto-pr</code> dry-run. <b>처방은 유효한 구독 키가 필요합니다</b> — 목적지와 회수 금액이 붙은 우선순위 계획, <code>auto-pr --fix-pr</code>(PR 생성), PR 가드 자동 코멘트, 절감 증명과 원장, HTML 리포트, 그리고 조직 전체 처방(Team 전용). 키는 개인(Solo)/팀(Team) 단위로 발급되며 결제 기간 + 짧은 유예기간 동안 유효하고, 공개 공유할 수 없습니다. 결제는 Gumroad(또는 Stripe)가 처리하며 카드 정보는 당사에 전달되지 않습니다. 영수증의 Gumroad 라이선스 키가 구매 증거이며, 그것으로 cimeter 키를 받거나 갱신합니다.</p>
 
+<h2>Subscriptions and automatic renewal / 구독과 자동 갱신</h2>
+<p><b>EN</b> — Solo and Team are monthly subscriptions sold and billed through Gumroad. The price shown at checkout is charged when you subscribe and then <b>automatically every month on the same day</b> until you cancel. Each paid month lets you issue a fresh cimeter key: paste the Gumroad license key from your receipt into <a href="claim.html">claim.html</a>, or run <code>cimeter renew</code>. You can cancel at any time from the membership link in your Gumroad receipt email, or by emailing us. Cancelling stops all future charges; your key keeps working until the end of the month you have already paid for. If the price changes, we will email existing subscribers at least 30 days before the new price applies to them, so you can cancel first.</p>
+<p><b>KO</b> — Solo 와 Team 은 Gumroad 를 통해 판매·결제되는 <b>월 구독</b>입니다. 결제 화면에 표시된 금액이 구독 시점에 청구되고, 이후 해지할 때까지 <b>매달 같은 날 자동으로</b> 청구됩니다. 결제된 달마다 새 cimeter 키를 받을 수 있습니다 — 영수증의 Gumroad 라이선스 키를 <a href="claim.html">claim.html</a> 에 붙여넣거나 <code>cimeter renew</code> 를 실행하세요. 해지는 Gumroad 영수증 메일의 구독 관리 링크나 이메일 요청으로 언제든 할 수 있습니다. 해지하면 이후 청구가 모두 멈추고, 이미 결제한 달이 끝날 때까지 키는 그대로 작동합니다. 가격이 바뀌면 새 가격이 적용되기 최소 30일 전에 기존 구독자에게 이메일로 알리며, 그 전에 해지할 수 있습니다.</p>
+
 <h2>Refunds / 환불</h2>
-<p><b>EN</b> — Not satisfied within 14 days of your first payment? Email us for a full refund.</p>
-<p><b>KO</b> — 첫 결제 후 14일 이내에 만족하지 못하셨다면 이메일로 전액 환불을 요청할 수 있습니다.</p>
+<p><b>EN</b> — <b>First payment:</b> not satisfied within 14 days of your first payment? Email us for a full refund. <b>Monthly renewals:</b> cancel before the renewal date to avoid the next charge. A renewal that has already been charged is not refunded, except where the law requires it (including the right of withdrawal under the Korean Act on the Consumer Protection in Electronic Commerce) or where the service did not work as described. Refunds go back through Gumroad to the original payment method. Once a purchase is refunded, its Gumroad license key can no longer issue or renew a cimeter key.</p>
+<p><b>KO</b> — <b>첫 결제:</b> 첫 결제 후 14일 이내에 만족하지 못하셨다면 이메일로 전액 환불을 요청할 수 있습니다. <b>매월 갱신 결제:</b> 다음 청구를 원하지 않으면 갱신일 전에 해지하세요. 이미 청구된 갱신 결제는 환불하지 않습니다. 다만 법령이 정한 경우(「전자상거래 등에서의 소비자보호에 관한 법률」에 따른 청약철회 포함)와 서비스가 설명대로 작동하지 않은 경우는 예외입니다. 환불은 Gumroad 를 통해 원래 결제 수단으로 돌아가며, 환불된 구매의 Gumroad 라이선스 키로는 더 이상 cimeter 키를 받거나 갱신할 수 없습니다.</p>
 
 <h2>Disclaimer / 면책</h2>
 <p><b>EN</b> — Savings estimates are heuristic and conservative but not guaranteed. The software is provided as-is; apply recommendations at your own discretion.</p>
 <p><b>KO</b> — 절감 추정치는 보수적 휴리스틱이며 보장되지 않습니다. 소프트웨어는 있는 그대로 제공되며, 권고 적용 여부는 사용자의 판단에 따릅니다.</p>
+
+<h2 id="contact">Contact and business information / 문의 및 사업자 정보</h2>
+<table class="biz">
+<tr><th>상호 / Business name</th><td>Chordy Studio</td></tr>
+<tr><th>대표 / Representative</th><td>한효창</td></tr>
+<tr><th>사업자등록번호 / Business registration no.</th><td>584-09-03298</td></tr>
+<tr><th>주소 / Address</th><td>경기도 이천시 경충대로2092번길 31, 902호</td></tr>
+<tr><th>이메일 / Email</th><td><a href="mailto:etudes0803@gmail.com">etudes0803@gmail.com</a></td></tr>
+</table>
+<p class="muted">Questions, cancellations, refunds and data deletion all go to the email above. / 문의·해지·환불·개인정보 삭제 요청은 모두 위 이메일로 받습니다.</p>
 
 <p><a href="index.html">← Back / 돌아가기</a></p>
 </body></html>

@@ -16,8 +16,8 @@
      Link. Until these are set the page has no way to take money, so the pricing
      card offers the trial instead of a dead button. Pass them to
      scripts/sync-landing.mjs as BUY_SOLO / BUY_TEAM. */
-  window.CIMETER_BUY_SOLO = "";
-  window.CIMETER_BUY_TEAM = "";
+  window.CIMETER_BUY_SOLO = "https://etudes6.gumroad.com/l/cimeter-solo";
+  window.CIMETER_BUY_TEAM = "https://etudes6.gumroad.com/l/cimeter-team";
 </script>
 <style>
   /* One theme family, light and dark, single accent. Tokens first. */
@@ -272,21 +272,21 @@
 <pre class="term" aria-label="cimeter command line output"><span class="c">$ cimeter spend --repo acme/mobile-app</span>
 
 Monthly CI spend <span class="c">(measured, not estimated)</span>
-  MACOS     3036 min   <b>$242.88</b>   96.8%
-  UBUNTU    1012 min   <b>$  8.10</b>    3.2%
-  <b>total     4048 min   $250.98</b>
+  MACOS     3036 min   <b>$188.23</b>   96.9%
+  UBUNTU    1012 min   <b>$  6.07</b>    3.1%
+  <b>total     4048 min   $194.30</b>
 
-<span class="w">!</span> MACOS is 96.8% of your bill at 10x the
+<span class="w">!</span> MACOS is 96.9% of your bill at 10.3x the
   Linux rate. Highest leverage target.
 
 Where it goes <span class="c">(free)</span>
-  lint spends <b>$44.16</b>/mo on MACOS — 6 of its
+  lint spends <b>$34.22</b>/mo on MACOS — 6 of its
     6 steps were read, and none requires that runner.
-  typecheck spends <b>$29.44</b>/mo on MACOS — same.
+  typecheck spends <b>$22.82</b>/mo on MACOS — same.
 
 <span class="c">With a licence, the same run also prints:</span>
-  <span class="g">+$39.74/mo</span> move lint to ubuntu-latest
-  <span class="g">+$26.50/mo</span> move typecheck to ubuntu-latest</pre>
+  <span class="g">+$30.91/mo</span> move lint to ubuntu-latest
+  <span class="g">+$20.61/mo</span> move typecheck to ubuntu-latest</pre>
       </div>
     </div>
   </section>
@@ -305,19 +305,19 @@ Where it goes <span class="c">(free)</span>
           <tr>
             <td>macOS</td>
             <td class="n">3,036</td>
-            <td class="n">$242.88</td>
+            <td class="n">$188.23</td>
             <td style="width:26%"><span class="bar" style="width:97%"></span></td>
           </tr>
           <tr>
             <td>Ubuntu</td>
             <td class="n">1,012</td>
-            <td class="n">$8.10</td>
+            <td class="n">$6.07</td>
             <td><span class="bar dim" style="width:3%"></span></td>
           </tr>
           <tr class="total">
             <td data-i18n="td_total"></td>
             <td class="n">4,048</td>
-            <td class="n">$250.98</td>
+            <td class="n">$194.30</td>
             <td></td>
           </tr>
         </table>
@@ -365,14 +365,14 @@ Where it goes <span class="c">(free)</span>
           <tr>
             <td><span class="ok">&#10003;</span> lint</td>
             <td class="muted">2026-08-09</td>
-            <td class="n">$39.74</td>
-            <td class="n ok">$27.90</td>
-            <td class="n muted">$19.93 to $35.87</td>
+            <td class="n">$30.91</td>
+            <td class="n ok">$21.70</td>
+            <td class="n muted">$15.50 to $27.90</td>
           </tr>
           <tr>
             <td><span class="muted">&#8230;</span> typecheck</td>
             <td class="muted">2026-08-21</td>
-            <td class="n">$26.50</td>
+            <td class="n">$20.61</td>
             <td class="n muted" data-i18n="td_pending"></td>
             <td class="n muted"></td>
           </tr>
@@ -456,8 +456,12 @@ Where it goes <span class="c">(free)</span>
 <pre class="term" style="margin-top:26px"><span class="c"># install</span>
 npm install -g cimeter
 
+<span class="c"># a GitHub token that can read your Actions runs</span>
+export GITHUB_TOKEN=$(gh auth token)   <span class="c"># or a token with the repo scope</span>
+
 <span class="c"># measure your real bill, free</span>
 cimeter spend --org your-org</pre>
+      <p class="note" data-i18n="token_note"></p>
     </div>
   </section>
 
@@ -466,7 +470,7 @@ cimeter spend --org your-org</pre>
 <footer>
   <div class="wrap foot-in">
     <span data-i18n="footer"></span>
-    <span><a href="legal.html" data-i18n="footer_legal"></a></span>
+    <span><a href="legal.html#contact" data-i18n="footer_contact"></a> · <a href="legal.html" data-i18n="footer_legal"></a></span>
   </div>
 </footer>
 
@@ -484,7 +488,7 @@ const I18N = {
 
     bill_eyebrow: "The part the invoice hides",
     bill_title: "A tenth of the minutes can be most of the money",
-    bill_body: "GitHub charges macOS runners at ten times the Linux rate, and Windows at twice. A small number of mac minutes routinely dominates the invoice, and the total on your billing page never shows you that.",
+    bill_body: "GitHub charges macOS runners about ten times the Linux rate, and Windows about 1.7 times. A small number of mac minutes routinely dominates the invoice, and the total on your billing page never shows you that.",
     bill_note: "cimeter pulls per-runner billable minutes from the GitHub billing API, so these are measured figures rather than an estimate built on a guessed run count.",
     th_runner: "Runner", th_min: "Min / mo", th_usd: "Cost / mo", th_share: "Share",
     td_total: "Total",
@@ -496,7 +500,7 @@ const I18N = {
     how_1_b: "It reads billable minutes per runner from the GitHub API and ranks your repositories by real spend. Log contents never leave your machine.",
     how_2_k: "Attribute",
     how_2_h: "See which job spends the money",
-    how_2_b: "Cost is broken down job by job, then each fix carries a figure: move this lint job off macOS and you keep $39.74 a month.",
+    how_2_b: "Cost is broken down job by job, then each fix carries a figure: move this lint job off macOS and you keep $30.91 a month.",
     how_3_k: "Recover",
     how_3_h: "Take the fix as a pull request",
     how_3_b: "Before proposing a runner change, cimeter checks that the job's steps contain no platform-specific tooling. Then it opens a pull request. It never merges anything.",
@@ -550,6 +554,7 @@ const I18N = {
     renew_link: "Already subscribed? Renew with the licence key on your Gumroad receipt",
     claim_link: "Bought on Gumroad? Turn the license key on your receipt into your cimeter key — and renew with it later",
     renew_back: "Not subscribed yet? Get a trial key",
+    token_note: "cimeter calls GitHub with this token from your machine. Read access to Actions is enough to measure (classic token: repo scope). To see GitHub's own invoice beside the measurement, use an organisation owner's or billing manager's token (fine-grained: the organisation's Administration permission, read).",
     renew_btn: "Send my new key",
     renew_key_ph: "the key you have now (CMO....)",
     renew_need_key: "Paste the licence key you already have — it proves the address is yours. Bought on Gumroad? Use the claim page with the license key from your receipt instead; it never expires and renews you too.",
@@ -559,6 +564,7 @@ const I18N = {
     trial_waking: "Waking the key service. This can take up to a minute on the first request of the day.",
     footer: "cimeter. Analyse locally, save monthly.",
     footer_legal: "Terms and privacy",
+    footer_contact: "Contact and business info",
   },
   ko: {
     nav_bill: "청구서", nav_how: "동작 방식", nav_proof: "실적", nav_pricing: "요금제",
@@ -572,7 +578,7 @@ const I18N = {
 
     bill_eyebrow: "청구서가 감추는 부분",
     bill_title: "분의 10분의 1이 금액의 대부분일 수 있습니다",
-    bill_body: "GitHub은 macOS 러너에 Linux의 10배, Windows에 2배 요율을 매깁니다. 적은 mac 분이 청구액을 지배하는 일이 흔한데, 결제 페이지의 총액만으로는 그 사실이 드러나지 않습니다.",
+    bill_body: "GitHub은 macOS 러너에 Linux의 약 10배, Windows에 약 1.7배 요율을 매깁니다. 적은 mac 분이 청구액을 지배하는 일이 흔한데, 결제 페이지의 총액만으로는 그 사실이 드러나지 않습니다.",
     bill_note: "cimeter는 GitHub 청구 API에서 러너별 청구 분을 직접 가져옵니다. 실행 횟수를 추측해 만든 추정치가 아니라 측정값입니다.",
     th_runner: "러너", th_min: "월 분", th_usd: "월 비용", th_share: "비중",
     td_total: "합계",
@@ -584,7 +590,7 @@ const I18N = {
     how_1_b: "GitHub API에서 러너별 청구 분을 읽어 저장소를 실제 지출 순으로 정렬합니다. 로그 내용은 사용자 머신을 벗어나지 않습니다.",
     how_2_k: "귀속",
     how_2_h: "어느 잡이 돈을 쓰는지 봅니다",
-    how_2_b: "비용을 잡 단위로 쪼갠 뒤 각 조치에 금액을 붙입니다. 이 lint 잡을 macOS에서 옮기면 월 $39.74가 남습니다.",
+    how_2_b: "비용을 잡 단위로 쪼갠 뒤 각 조치에 금액을 붙입니다. 이 lint 잡을 macOS에서 옮기면 월 $30.91가 남습니다.",
     how_3_k: "회수",
     how_3_h: "수정을 PR로 받습니다",
     how_3_b: "러너 변경을 제안하기 전에 그 잡의 스텝에 플랫폼 전용 명령이 없는지 확인합니다. 결과는 PR로 오며, 자동 머지는 하지 않습니다.",
@@ -638,6 +644,7 @@ const I18N = {
     renew_link: "이미 구독 중이신가요? Gumroad 영수증의 라이선스 키로 갱신하세요",
     claim_link: "Gumroad 에서 구매하셨나요? 영수증의 라이선스 키로 cimeter 키를 받으세요 — 갱신도 같은 키로",
     renew_back: "아직 구독 전이신가요? 체험 키 받기",
+    token_note: "cimeter는 이 토큰으로 사용자 머신에서 GitHub을 직접 호출합니다. 측정에는 Actions 읽기 권한이면 충분합니다(classic 토큰: repo 스코프). GitHub 자신의 청구 장부를 나란히 보려면 조직 owner 나 billing manager 의 토큰을 쓰세요(fine-grained: 조직 Administration 읽기).",
     renew_btn: "새 키 받기",
     renew_key_ph: "지금 가지고 계신 키 (CMO....)",
     renew_need_key: "지금 가지고 계신 라이선스 키를 붙여넣으세요 — 그 주소가 본인 것임을 증명합니다. Gumroad 에서 구매하셨다면 영수증의 라이선스 키로 claim 페이지를 쓰세요. 그 키는 만료되지 않고 갱신에도 쓰입니다.",
@@ -647,6 +654,7 @@ const I18N = {
     trial_waking: "키 발급 서비스를 깨우는 중입니다. 하루 첫 요청은 1분까지 걸릴 수 있습니다.",
     footer: "cimeter. 로컬에서 분석하고, 매달 절감합니다.",
     footer_legal: "이용약관 및 개인정보처리방침",
+    footer_contact: "문의 및 사업자 정보",
   },
 };
 
